@@ -3,16 +3,6 @@ import flatpickr from "flatpickr";
 import Notiflix from 'notiflix';
 import "flatpickr/dist/flatpickr.min.css";
 
-const options = {
-  enableTime: true,
-  time_24hr: true,
-  defaultDate: new Date(),
-  minuteIncrement: 1,
-  onClose(selectedDates) {
-    console.log(selectedDates[0]);
-  },
-};
-
 function convertMs(ms) {
   // Number of milliseconds per unit of time
   const second = 1000;
@@ -41,29 +31,50 @@ const timer = document.querySelector('.timer');
 const timerField = document.querySelectorAll('.field');
 const timerValue = document.querySelectorAll('.value');
 const timerLabel = document.querySelectorAll('.label');
-console.log(timer.children);
 
-
+datetimeInput.style.cssText += "width:150px;height:30px;padding:3px;font-size:15px;";
+startButton.style.cssText += "width:60px;height:30px;padding:3px;font-size:15px;";
 timer.style.cssText += "display:flex;gap:15px;";
 timerField.forEach((field) => { 
     field.style.cssText += "display:flex;flex-direction:column;align-items:center;";
 });
 timerValue.forEach((value) => { 
-    value.style.cssText += "font-size: 30px;";
+    value.style.cssText += "font-size:30px;";
 });
 timerLabel.forEach((label) => { 
-    label.style.cssText += "text-transform:uppercase;font-size: 10px;";
+    label.style.cssText += "text-transform:uppercase;font-size:10px;";
 });
 
-// timerField[0].style.cssText += "display:flex;gap:5px;flex-direction:column;align-items:center;";
-// timerField[1].style.cssText += "display:flex;gap:5px;flex-direction:column;align-items:center;";
-// timerField[2].style.cssText += "display:flex;gap:5px;flex-direction:column;align-items:center;";
-// timerField[3].style.cssText += "display:flex;gap:5px;flex-direction:column;align-items:center;";
+startButton.disabled = true;
+startButton.addEventListener('click', onClickButton);
 
-// timerField.style.boxShadow = "(0 3px 4px 0 rgba(0, 0, 0, .2),inset 2px 4px 0 0 rgba(255, 255, 255, .08));"
-// border-radius: 8px; 
-//     @include box-shadow(0 3px 4px 0 rgba(0, 0, 0, .2),inset 2px 4px 0 0 rgba(255, 255, 255, .08));
-// timerField.style.cssText += "display:flex;gap:10px;";
+const options = {
+    enableTime: true,
+    time_24hr: true,
+    defaultDate: new Date(),
+    minuteIncrement: 1,
+    onOpen() {
+        startButton.disabled = true;
+    },
+    onClose(selectedDates) {
+        const currentDate = new Date();
+        // console.log(selectedDates[0]);
+        // console.log(currentDate);
+        if (selectedDates[0] > currentDate) {
+            startButton.disabled = false;
+        } else {
+            window.alert("Please choose a date in the future");
+            startButton.disabled = true;
+        }
+    },
+};
+flatpickr(datetimeInput, options);
+
+function onClickButton() { 
+    startButton.disabled = true;
+};
+
+// box-shadow(0 3px 4px 0 rgba(0, 0, 0, .2),inset 2px 4px 0 0 rgba(255, 255, 255, .08));
 
 //    Напиши скрипт таймера, который ведёт обратный отсчет до определенной даты.  
 //    Добавь минимальное оформление элементов интерфейса.
