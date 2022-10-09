@@ -21,9 +21,22 @@ function convertMs(ms) {
 
   return { days, hours, minutes, seconds };
 }
-console.log(convertMs(2000)); // {days: 0, hours: 0, minutes: 0, seconds: 2}
-console.log(convertMs(140000)); // {days: 0, hours: 0, minutes: 2, seconds: 20}
-console.log(convertMs(24140000)); // {days: 0, hours: 6 minutes: 42, seconds: 20}
+function addLeadingZero(value) {
+    return String(value).padStart(2, '0');
+};
+function updateClockface({ days, hours, minutes, seconds }) {
+    const daysOnClockface = document.querySelector('span[data-days]');
+    const hoursOnClockface = document.querySelector('span[data-hours]');
+    const minutesOnClockface = document.querySelector('span[data-minutes]');
+    const secondsOnClockface = document.querySelector('span[data-seconds]');
+    daysOnClockface.textContent = `${addLeadingZero(days)}`;
+    hoursOnClockface.textContent = `${addLeadingZero(hours)}`;
+    minutesOnClockface.textContent = `${addLeadingZero(minutes)}`;
+    secondsOnClockface.textContent = `${addLeadingZero(seconds)}`;
+}
+// console.log(convertMs(2000)); // {days: 0, hours: 0, minutes: 0, seconds: 2}
+// console.log(convertMs(140000)); // {days: 0, hours: 0, minutes: 2, seconds: 20}
+// console.log(convertMs(24140000)); // {days: 0, hours: 6 minutes: 42, seconds: 20}
 
 const datetimeInput = document.querySelector('#datetime-picker');
 const startButton = document.querySelector('button[data-start]');
@@ -45,9 +58,6 @@ timerLabel.forEach((label) => {
     label.style.cssText += "text-transform:uppercase;font-size:10px;";
 });
 
-startButton.disabled = true;
-startButton.addEventListener('click', onClickButton);
-
 const options = {
     enableTime: true,
     time_24hr: true,
@@ -58,62 +68,53 @@ const options = {
     },
     onClose(selectedDates) {
         const currentDate = new Date();
-        // console.log(selectedDates[0]);
-        // console.log(currentDate);
         if (selectedDates[0] > currentDate) {
             startButton.disabled = false;
         } else {
-            window.alert("Please choose a date in the future");
+            Notiflix.Notify.failure("Please choose a date in the future");
+            // window.alert("Please choose a date in the future");
             startButton.disabled = true;
         }
     },
 };
 flatpickr(datetimeInput, options);
 
+class Timer {
+    constructor({ onTick }) {
+        this.intervalId = null;
+        this.onTick = onTick;
+    }
+    start() {
+        const startTime = Date.now();
+        this.intervalId = setInterval(() => {
+            const currentTime = Date.now();
+            const deltaTime = currentTime - startTime;
+            const timeComponents = convertMs(deltaTime)
+            this.onTick(timeComponents);
+        }, 1000);
+    }
+    stop() {
+        clearInterval(this.intervalId);
+    }
+}
+
+const newTimer = new Timer({
+    onTick: updateClockface
+});
+
+startButton.addEventListener('click', onClickButton);
+startButton.disabled = true;
 function onClickButton() { 
     startButton.disabled = true;
+    datetimeInput.disabled = true;
+    newTimer.start();
 };
 
-// box-shadow(0 3px 4px 0 rgba(0, 0, 0, .2),inset 2px 4px 0 0 rgba(255, 255, 255, .08));
-
-//    Напиши скрипт таймера, который ведёт обратный отсчет до определенной даты.  
-//    Добавь минимальное оформление элементов интерфейса.
-//    Используй библиотеку flatpickr для того чтобы позволить пользователю кроссбраузерно 
-// выбрать конечную дату и время в одном элементе интерфейса.
-//==============
-// Выбор даты​
-//==============
-//    Метод onClose() из обьекта параметров вызывается каждый раз при закрытии элемента 
-// интерфейса который создает flatpickr. Именно в нём стоит обрабатывать дату выбранную 
-// пользователем. Параметр selectedDates это массив выбранных дат, поэтому мы берем первый 
-// элемент.
-//   - Если пользователь выбрал дату в прошлом, покажи window.alert() с текстом 
-// "Please choose a date in the future".
-//   - Если пользователь выбрал валидную дату (в будущем), кнопка «Start» становится активной.
-//   - Кнопка «Start» должа быть не активна до тех пор, пока пользователь не выбрал дату 
-// в будущем.
-//   - При нажатии на кнопку «Start» начинается отсчет времени до выбранной даты с момента 
-// нажатия.
-//================
-// Отсчет времени
-//================
-//    При нажатии на кнопку «Start» скрипт должен вычислять раз в секунду сколько времени 
-// осталось до указанной даты и обновлять интерфейс таймера, показывая 
-// четыре цифры: дни, часы, минуты и секунды в формате xx: xx: xx: xx.
-//   - Количество дней может состоять из более чем двух цифр.
-//   - Таймер должен останавливаться когда дошел до конечной даты, то есть 00:00:00:00.
-//   - Для подсчета значений используй готовую функцию convertMs, где ms - разница между 
-// конечной и текущей датой в миллисекундах.
-//========================
-// Форматирование времени​
-//========================
-// Функция convertMs() возвращает объект с рассчитанным оставшимся временем до конечной даты. 
-// Обрати внимание, что она не форматирует результат. То есть, если осталось 4 минуты или 
-// любой другой составляющей времени, то функция вернет 4, а не 04. В интерфейсе таймера 
-// необходимо добавлять 0 если в числе меньше двух символов. 
-// Напиши функцию addLeadingZero(value), которая использует метод метод padStart() и перед 
-// отрисовкой интефрейса форматируй значение.
-//==============================
-// Библиотека уведомлений
-//==============================
-// Для отображения уведомлений пользователю вместо window.alert() используй библиотеку notiflix.
+// const body = document.querySelector('body');
+// body.addEventListener('click', onBodyClick);
+// function onBodyClick({ target }) {
+//     if (target === timer || target === body) {
+//         datetimeInput.disabled = false;
+//         newTimer.stop();
+//     }
+// }
