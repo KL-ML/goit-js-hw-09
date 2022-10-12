@@ -21,7 +21,6 @@ function createPromise(position, delay) {
 function onFormSubmit(event) {
   event.preventDefault();
   if (!event.target.tagName === 'BUTTON') return;
-  console.log(event.target.tagName);
   const {
     elements: { delay, step, amount },
   } = event.currentTarget;
