@@ -1,5 +1,6 @@
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 const formEl = document.querySelector('.form');
+
 let delayInp = null;
 let stepInp = null;
 let amountInp = null;
